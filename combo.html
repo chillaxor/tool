@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>纯前端Excel合并工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑";
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover {
+            border-color: #666;
+        }
+        #file-input {
+            display: none;
+        }
+        .btn {
+            display: block;
+            width: 200px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: #0078d7;
+            color: white;
+            border-radius: 4px;
+            margin: 0 auto;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .file-list {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .file-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>纯前端多Excel合并工具</h1>
+        <div class="upload-area" id="upload-area">
+            <p>点击或拖拽文件到此处上传（仅支持XLSX格式）</p>
+            <input type="file" id="file-input" multiple accept=".xlsx">
+        </div>
+        <div class="file-list" id="file-list"></div>
+        <div class="error" id="error"></div>
+        <div class="loading" id="loading">合并中，请稍候...</div>
+        <button class="btn" id="submit-btn" disabled>开始合并</button>
+    </div>
+
+    <script>
+        // 全局变量
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const submitBtn = document.getElementById('submit-btn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        let selectedFiles = [];
+
+        // 初始化：绑定事件
+        function init() {
+            // 点击上传区域
+            uploadArea.addEventListener('click', () => fileInput.click());
+            // 拖拽上传
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#0078d7';
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                handleFiles(e.dataTransfer.files);
+            });
+            // 文件选择变化
+            fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+            // 合并按钮点击
+            submitBtn.addEventListener('click', mergeExcelFiles);
+        }
+
+        // 处理选中的文件
+        function handleFiles(files) {
+            // 过滤仅保留xlsx文件
+            selectedFiles = Array.from(files).filter(file => file.name.endsWith('.xlsx'));
+            
+            if (selectedFiles.length === 0) {
+                error.textContent = "请选择XLSX格式的文件！";
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // 清空错误提示，显示文件列表
+            error.textContent = "";
+            fileList.innerHTML = "";
+            selectedFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.textContent = file.name;
+                fileList.appendChild(item);
+            });
+            submitBtn.disabled = false;
+        }
+
+        // 核心：合并Excel文件
+        async function mergeExcelFiles() {
+            if (selectedFiles.length === 0) return;
+            
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            error.textContent = "";
+
+            try {
+                // 存储所有解析后的Excel数据
+                let allData = [];
+                let header = [];
+
+                // 遍历所有上传的文件
+                for (const file of selectedFiles) {
+                    const data = await readExcelFile(file);
+                    if (data.length === 0) continue;
+
+                    // 提取表头（仅取第一个文件的表头）
+                    if (header.length === 0) header = data[0];
+                    // 提取数据行（排除表头）
+                    const rows = data.slice(1);
+                    allData = allData.concat(rows);
+                }
+
+                // 处理数据：第三列（索引2）强制转为字符串（对应Python中的user_id）
+                allData = allData.map(row => {
+                    if (row.length > 2) {
+                        row[2] = String(row[2] || ''); // 转为字符串，空值处理为空字符串
+                    }
+                    return row;
+                });
+
+                // 生成新的Excel文件
+                generateExcelFile(header, allData);
+
+                alert("合并成功！文件已开始下载");
+            } catch (err) {
+                error.textContent = "合并失败：" + err.message;
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 读取单个Excel文件
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        // 取第一个工作表
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        // 转换为二维数组（表头+数据）
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        resolve(jsonData);
+                    } catch (err) {
+                        reject(new Error(`解析${file.name}失败：${err.message}`));
+                    }
+                };
+                reader.onerror = () => reject(new Error(`读取${file.name}失败`));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // 生成并下载Excel文件（带样式）
+        function generateExcelFile(header, data) {
+            // 创建工作簿和工作表
+            const workbook = XLSX.utils.book_new();
+            // 组合表头+数据
+            const wsData = [header].concat(data);
+            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+
+            // ========== 模拟Python中的样式设置（SheetJS基础样式支持） ==========
+            // 1. 设置列宽（对应Python的column_dimensions.width=30）
+            const colWidths = wsData[0].map(() => ({ wch: 30 }));
+            worksheet['!cols'] = colWidths;
+
+            // 2. 设置首行行高（对应Python的row_dimensions[1].height=50）
+            worksheet['!rows'] = [{ hpx: 50 }]; // 首行行高50px
+
+            // 3. 首行样式（SheetJS的样式需要借助xlsx-style，这里简化为基础样式）
+            // 注：SheetJS核心库样式支持有限，如需完整样式可替换为xlsx-style（需替换CDN）
+            const headerRange = XLSX.utils.decode_range(worksheet['!ref']);
+            for (let c = headerRange.s.c; c <= headerRange.e.c; c++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: 0, c });
+                worksheet[cellAddress].s = {
+                    fill: { fgColor: { rgb: "D3D3D3" } }, // 灰色背景
+                    font: { name: "微软雅黑", sz: 13, bold: true, color: { rgb: "000000" } }, // 字体
+                    alignment: { horizontal: "center", vertical: "center", wrapText: true } // 居中+换行
+                };
+            }
+
+            // 添加工作表到工作簿
+            XLSX.utils.book_append_sheet(workbook, worksheet, "合并数据");
+
+            // 生成文件并下载
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            saveAs(blob, 'merged_excel_file.xlsx');
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
