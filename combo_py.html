@@ -2,104 +2,80 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Excel 多文件合并工具</title>
-    <!-- 引入 PyScript 核心样式和脚本 -->
+    <title>Excel 合并工具</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2026.3.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2026.3.1/core.js"></script>
 </head>
 <body>
-    <h1>Excel 多文件合并工具</h1>
-    <!-- 文件上传组件：支持多选 xlsx 文件 -->
+    <h1>Excel 多文件合并</h1>
     <input type="file" id="excel-upload" accept=".xlsx" multiple />
     <button py-click="merge_excel()">开始合并</button>
-    <!-- 合并结果下载链接（初始隐藏） -->
-    <a id="download-link" style="display: none;" download="merged_excel_file.xlsx">下载合并后的Excel</a>
+    <a id="download-link" style="display:none;" download="merged.xlsx">下载合并文件</a>
 
-    <!-- 声明 PyScript 依赖：必须放在 py-script 之前 -->
-    <py-env>
-        - pandas
-        - openpyxl
-    </py-env>
+<py-script>
+import micropip
+# 🔥 强制安装依赖（这行解决报错）
+await micropip.install(["pandas", "openpyxl"])
 
-    <!-- PyScript 代码块：嵌入 execl.py 的核心逻辑并适配前端 -->
-    <py-script>
-        import pandas as pd
-        from openpyxl import load_workbook
-        from openpyxl.styles import PatternFill, Font, Alignment
-        from openpyxl.utils import get_column_letter
-        import io
-        from js import document, Blob, URL
-        from pyodide.ffi import create_proxy
+# 现在可以正常导入
+import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.utils import get_column_letter
+import io
+from js import document, Blob, URL
 
-        def merge_excel():
-            # 1. 获取用户上传的文件列表
-            file_input = document.getElementById("excel-upload")
-            files = file_input.files
-            if not files or files.length == 0:
-                print("请先上传至少一个 Excel 文件！")
-                return
+async def merge_excel():
+    file_input = document.getElementById("excel-upload")
+    files = file_input.files
+    if not files or files.length == 0:
+        print("请先上传Excel文件")
+        return
 
-            # 2. 读取所有上传的 Excel 文件并存储
-            excel_data = []
-            for file in files:
-                # 将 JS 文件对象转为 Python 可读取的二进制流
-                file_bytes = io.BytesIO(file.arrayBuffer().to_py())
-                # 读取 Excel（保持原逻辑：第3列设为字符串）
-                df = pd.read_excel(file_bytes, dtype={2: str})
-                excel_data.append(df)
+    excel_data = []
+    for file in files:
+        array_buf = await file.arrayBuffer()
+        file_bytes = io.BytesIO(array_buf.to_py())
+        df = pd.read_excel(file_bytes, dtype={2: str})
+        excel_data.append(df)
 
-            # 3. 合并 DataFrame（保持原逻辑）
-            merged_df = pd.concat(excel_data, ignore_index=True)
-            if merged_df.shape[1] > 2:
-                merged_df.iloc[:, 2] = merged_df.iloc[:, 2].astype(str)
+    # 合并
+    merged_df = pd.concat(excel_data, ignore_index=True)
+    
+    # 保存到内存
+    output = io.BytesIO()
+    merged_df.to_excel(output, index=False)
+    output.seek(0)
 
-            # 4. 将合并后的数据写入内存流（替代本地文件）
-            output_io = io.BytesIO()
-            merged_df.to_excel(output_io, index=False)
-            output_io.seek(0)  # 重置流指针
+    # 样式美化
+    wb = load_workbook(output)
+    ws = wb.active
+    ws.row_dimensions[1].height = 50
+    for col in range(1, ws.max_column+1):
+        ws.column_dimensions[get_column_letter(col)].width = 30
 
-            # 5. 用 openpyxl 加载内存流并设置样式（保持原样式逻辑）
-            wb = load_workbook(output_io)
-            ws = wb.active
+    # 表头样式
+    fill = PatternFill("solid", fgColor="D3D3D3")
+    font = Font(bold=True, name="微软雅黑", size=13)
+    align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    for cell in ws[1]:
+        cell.fill = fill
+        cell.font = font
+        cell.alignment = align
 
-            # 首行行高
-            ws.row_dimensions[1].height = 50
-            # 所有列宽
-            for col_idx in range(1, ws.max_column + 1):
-                col_letter = get_column_letter(col_idx)
-                ws.column_dimensions[col_letter].width = 30
+    # 生成最终文件
+    final = io.BytesIO()
+    wb.save(final)
+    final.seek(0)
 
-            # 首行样式
-            gray_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
-            header_font = Font(name='微软雅黑', size=13, bold=True, color='000000')
-            center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            for cell in ws[1]:
-                cell.fill = gray_fill
-                cell.font = header_font
-                cell.alignment = center_alignment
+    # 创建下载链接
+    blob = Blob.new([final.read()], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
+    url = URL.createObjectURL(blob)
+    link = document.getElementById("download-link")
+    link.href = url
+    link.style.display = "block"
+    print("合并完成！点击下载")
 
-            # 正文样式
-            body_font = Font(name='Calibri')
-            for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-                for cell in row:
-                    cell.font = body_font
-
-            # 6. 将样式后的工作簿写入新的内存流
-            final_io = io.BytesIO()
-            wb.save(final_io)
-            final_io.seek(0)
-
-            # 7. 生成前端下载链接
-            # 将 Python 内存流转为 JS 的 Blob 对象
-            blob = Blob.new([final_io.read()], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
-            # 创建下载 URL
-            download_url = URL.createObjectURL(blob)
-            # 显示并设置下载链接
-            download_link = document.getElementById("download-link")
-            download_link.href = download_url
-            download_link.style.display = "block"
-
-            print("Excel 合并完成！请点击下载链接获取文件")
-    </py-script>
+</py-script>
 </body>
 </html>
