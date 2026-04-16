@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Excel 合并工具</title>
+    <title>Excel 多文件合并工具</title>
     <!-- 引入 PyScript 核心样式和脚本 -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2026.3.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2026.3.1/core.js"></script>
@@ -14,6 +14,12 @@
     <button py-click="merge_excel()">开始合并</button>
     <!-- 合并结果下载链接（初始隐藏） -->
     <a id="download-link" style="display: none;" download="merged_excel_file.xlsx">下载合并后的Excel</a>
+
+    <!-- 声明 PyScript 依赖：必须放在 py-script 之前 -->
+    <py-env>
+        - pandas
+        - openpyxl
+    </py-env>
 
     <!-- PyScript 代码块：嵌入 execl.py 的核心逻辑并适配前端 -->
     <py-script>
