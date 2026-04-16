@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Excel 合并工具</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2026.3.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2026.3.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.12.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.12.1/core.js"></script>
 </head>
 <body>
     <h1>Excel 多文件合并</h1>
@@ -13,11 +13,6 @@
     <a id="download-link" style="display:none;" download="merged.xlsx">下载合并文件</a>
 
 <py-script>
-import micropip
-# 🔥 强制安装依赖（这行解决报错）
-await micropip.install(["pandas", "openpyxl"])
-
-# 现在可以正常导入
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font, Alignment
@@ -39,22 +34,17 @@ async def merge_excel():
         df = pd.read_excel(file_bytes, dtype={2: str})
         excel_data.append(df)
 
-    # 合并
     merged_df = pd.concat(excel_data, ignore_index=True)
-    
-    # 保存到内存
     output = io.BytesIO()
     merged_df.to_excel(output, index=False)
     output.seek(0)
 
-    # 样式美化
     wb = load_workbook(output)
     ws = wb.active
     ws.row_dimensions[1].height = 50
     for col in range(1, ws.max_column+1):
         ws.column_dimensions[get_column_letter(col)].width = 30
 
-    # 表头样式
     fill = PatternFill("solid", fgColor="D3D3D3")
     font = Font(bold=True, name="微软雅黑", size=13)
     align = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -63,19 +53,16 @@ async def merge_excel():
         cell.font = font
         cell.alignment = align
 
-    # 生成最终文件
     final = io.BytesIO()
     wb.save(final)
     final.seek(0)
 
-    # 创建下载链接
-    blob = Blob.new([final.read()], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
+    blob = Blob.new([final.read()], type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     url = URL.createObjectURL(blob)
     link = document.getElementById("download-link")
     link.href = url
     link.style.display = "block"
     print("合并完成！点击下载")
-
 </py-script>
 </body>
 </html>
