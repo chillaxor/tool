@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线工具集 - 简洁实用</title>
+    <!-- 引入外部库（二维码、MD5等） -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: #2d3748;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* 工具导航栏 */
+        .tool-nav {
+            background: white;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tool-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #e2e8f0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tool-btn.active, .tool-btn:hover {
+            background: #4299e1;
+            color: white;
+        }
+
+        /* 工具内容区 */
+        .tool-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+
+        .tool-panel {
+            display: none;
+        }
+
+        .tool-panel.active {
+            display: block;
+        }
+
+        .tool-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .tool-row {
+            margin-bottom: 1rem;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            background: #4299e1;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background: #38a169;
+        }
+
+        .btn-warning {
+            background: #d69e2e;
+        }
+
+        .result-box {
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 4px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 二维码容器 */
+        #qrcode-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        /* 颜色拾取器 */
+        #color-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 4px;
+            margin: 1rem 0;
+            border: 1px solid #ddd;
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <div class="container">
+            <div class="logo">在线工具集</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 工具菜单 -->
+        <div class="tool-nav">
+            <button class="tool-btn active" data-target="json">JSON格式化</button>
+            <button class="tool-btn" data-target="url">URL编解码</button>
+            <button class="tool-btn" data-target="base64">Base64</button>
+            <button class="tool-btn" data-target="md5">MD5加密</button>
+            <button class="tool-btn" data-target="timestamp">时间戳</button>
+            <button class="tool-btn" data-target="diff">文本对比</button>
+            <button class="tool-btn" data-target="qrcode">二维码生成</button>
+            <button class="tool-btn" data-target="color">颜色拾取</button>
+        </div>
+
+        <!-- 工具内容 -->
+        <div class="tool-content">
+            <!-- 1. JSON格式化 -->
+            <div class="tool-panel active" id="json">
+                <div class="tool-title">JSON格式化 / 压缩</div>
+                <div class="tool-row">
+                    <textarea id="json-input" rows="8" placeholder='输入JSON，例如：{"name":"工具","list":["格式化","压缩"]}'></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="formatJson()">格式化</button>
+                    <button class="btn btn-warning" onclick="compressJson()">压缩</button>
+                </div>
+                <div class="result-box" id="json-result"></div>
+            </div>
+
+            <!-- 2. URL编解码 -->
+            <div class="tool-panel" id="url">
+                <div class="tool-title">URL 编码 / 解码</div>
+                <div class="tool-row">
+                    <input type="text" id="url-input" placeholder="输入需要转换的内容">
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="encodeUrl()">编码</button>
+                    <button class="btn btn-warning" onclick="decodeUrl()">解码</button>
+                </div>
+                <div class="result-box" id="url-result"></div>
+            </div>
+
+            <!-- 3. Base64 -->
+            <div class="tool-panel" id="base64">
+                <div class="tool-title">Base64 加密 / 解密</div>
+                <div class="tool-row">
+                    <textarea id="base64-input" rows="5" placeholder="输入文本"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="encodeBase64()">加密</button>
+                    <button class="btn btn-warning" onclick="decodeBase64()">解密</button>
+                </div>
+                <div class="result-box" id="base64-result"></div>
+            </div>
+
+            <!-- 4. MD5 -->
+            <div class="tool-panel" id="md5">
+                <div class="tool-title">MD5 加密</div>
+                <div class="tool-row">
+                    <input type="text" id="md5-input" placeholder="输入字符串">
+                </div>
+                <button class="btn" onclick="md5Encrypt()">生成MD5</button>
+                <div class="result-box" id="md5-result"></div>
+            </div>
+
+            <!-- 5. 时间戳 -->
+            <div class="tool-panel" id="timestamp">
+                <div class="tool-title">时间戳 ↔ 日期时间</div>
+                <div class="tool-row">
+                    <input type="text" id="ts-input" placeholder="输入时间戳或日期">
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="tsToDate()">时间戳转日期</button>
+                    <button class="btn btn-warning" onclick="dateToTs()">日期转时间戳</button>
+                </div>
+                <div class="result-box" id="ts-result"></div>
+            </div>
+
+            <!-- 6. 文本对比 -->
+            <div class="tool-panel" id="diff">
+                <div class="tool-title">文本对比</div>
+                <div class="tool-row">
+                    <textarea id="diff-a" rows="4" placeholder="文本A"></textarea>
+                </div>
+                <div class="tool-row">
+                    <textarea id="diff-b" rows="4" placeholder="文本B"></textarea>
+                </div>
+                <button class="btn" onclick="textDiff()">对比</button>
+                <div class="result-box" id="diff-result"></div>
+            </div>
+
+            <!-- 7. 二维码 -->
+            <div class="tool-panel" id="qrcode">
+                <div class="tool-title">二维码生成</div>
+                <div class="tool-row">
+                    <input type="text" id="qrcode-input" placeholder="输入网址/文本">
+                </div>
+                <button class="btn" onclick="createQrcode()">生成</button>
+                <div id="qrcode-container"></div>
+            </div>
+
+            <!-- 8. 颜色拾取 -->
+            <div class="tool-panel" id="color">
+                <div class="tool-title">颜色拾取器</div>
+                <input type="color" id="color-picker" onchange="showColor()">
+                <div id="color-preview"></div>
+                <div class="result-box" id="color-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    <div class="footer">
+        在线工具集 &copy; 可直接部署到 GitHub Pages
+    </div>
+
+    <script>
+        // 切换工具面板
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const target = btn.dataset.target;
+                document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // ========== 工具功能 ==========
+        // JSON格式化
+        function formatJson() {
+            try {
+                const val = document.getElementById('json-input').value;
+                const obj = JSON.parse(val);
+                document.getElementById('json-result').innerText = JSON.stringify(obj, null, 2);
+            } catch (e) {
+                document.getElementById('json-result').innerText = 'JSON格式错误';
+            }
+        }
+
+        // JSON压缩
+        function compressJson() {
+            try {
+                const val = document.getElementById('json-input').value;
+                const obj = JSON.parse(val);
+                document.getElementById('json-result').innerText = JSON.stringify(obj);
+            } catch (e) {
+                document.getElementById('json-result').innerText = 'JSON格式错误';
+            }
+        }
+
+        // URL编码
+        function encodeUrl() {
+            const val = document.getElementById('url-input').value;
+            document.getElementById('url-result').innerText = encodeURIComponent(val);
+        }
+
+        // URL解码
+        function decodeUrl() {
+            const val = document.getElementById('url-input').value;
+            document.getElementById('url-result').innerText = decodeURIComponent(val);
+        }
+
+        // Base64加密
+        function encodeBase64() {
+            const val = document.getElementById('base64-input').value;
+            document.getElementById('base64-result').innerText = btoa(unescape(encodeURIComponent(val)));
+        }
+
+        // Base64解密
+        function decodeBase64() {
+            try {
+                const val = document.getElementById('base64-input').value;
+                document.getElementById('base64-result').innerText = decodeURIComponent(escape(atob(val)));
+            } catch (e) {
+                document.getElementById('base64-result').innerText = '解密失败';
+            }
+        }
+
+        // MD5加密
+        function md5Encrypt() {
+            const val = document.getElementById('md5-input').value;
+            document.getElementById('md5-result').innerText = CryptoJS.MD5(val).toString();
+        }
+
+        // 时间戳转日期
+        function tsToDate() {
+            const ts = document.getElementById('ts-input').value;
+            const date = new Date(ts.length === 10 ? ts * 1000 : Number(ts));
+            document.getElementById('ts-result').innerText = date.toLocaleString();
+        }
+
+        // 日期转时间戳
+        function dateToTs() {
+            const str = document.getElementById('ts-input').value;
+            const ts = new Date(str).getTime();
+            document.getElementById('ts-result').innerText = isNaN(ts) ? '格式错误' : Math.floor(ts / 1000);
+        }
+
+        // 文本对比
+        function textDiff() {
+            const a = document.getElementById('diff-a').value;
+            const b = document.getElementById('diff-b').value;
+            const res = a === b ? '内容完全一致' : '内容不一致';
+            document.getElementById('diff-result').innerText = res;
+        }
+
+        // 生成二维码
+        async function createQrcode() {
+            const text = document.getElementById('qrcode-input').value;
+            const container = document.getElementById('qrcode-container');
+            container.innerHTML = '';
+            await QRCode.toCanvas(container, text, { width: 200 });
+        }
+
+        // 颜色拾取
+        function showColor() {
+            const color = document.getElementById('color-picker').value;
+            document.getElementById('color-preview').style.background = color;
+            document.getElementById('color-result').innerText = `颜色值：${color}`;
+        }
+    </script>
+</body>
+</html>
