@@ -21,7 +21,7 @@
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding-bottom: 20px;
             border-bottom: 2px solid #007bff;
         }
@@ -29,6 +29,28 @@
         .header h1 {
             color: #007bff;
             margin-bottom: 10px;
+        }
+
+        /* JSON 导入区域（顶部，不乱版） */
+        .json-import-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .json-import-box h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .json-area {
+            width: 100%;
+            min-height: 180px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: monospace;
         }
         
         .container {
@@ -68,18 +90,12 @@
             color: #555;
         }
         
-        input, textarea, select {
+        input, textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
-        }
-        
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
         }
         
         .btn-group {
@@ -96,34 +112,19 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s;
         }
         
         .btn-primary {
             background-color: #007bff;
             color: white;
         }
-        
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
-        
-        .btn-secondary:hover {
-            background-color: #545b62;
-        }
-        
         .btn-success {
             background-color: #28a745;
             color: white;
-        }
-        
-        .btn-success:hover {
-            background-color: #1e7e34;
         }
         
         .result-area {
@@ -131,12 +132,9 @@
             min-height: 400px;
             padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
+            background: #f8f9fa;
+            font-family: Consolas, monospace;
             white-space: pre-wrap;
-            word-wrap: break-word;
             margin-bottom: 15px;
         }
         
@@ -146,46 +144,22 @@
             margin-bottom: 15px;
             font-weight: 600;
         }
-        
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .json-import {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px dashed #ddd;
-        }
-        
-        .json-area {
-            width: 100%;
-            min-height: 200px;
-            margin-bottom: 10px;
-        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>🔧 产品 SQL 语句生成工具</h1>
         <p>生成产品相关的INSERT SQL语句</p>
     </div>
-    
-    <div class="container">
-        <div class="form-card">
-              <div class="json-import">
-                <h3>📥 批量导入JSON配置</h3>
-                <textarea class="json-area" id="jsonInput">{
+
+    <!-- ====================== JSON 区域 已放到最顶部 ====================== -->
+    <div class="json-import-box">
+        <h3>📥 批量导入JSON配置（已默认填写）</h3>
+        <textarea class="json-area" id="jsonInput">{
     "alias": "wu_xing_sheng_ke_da_yun",
     "product_id": "177613634479110248",
     "app_id": "A1046",
@@ -198,83 +172,78 @@
     "algorithm_path": "/ziwei/wuxingshengkedayun",
     "index_url": "/wuxingshengkedayun/index",
     "channel_id": "online_paytest",
-    "icon":"https://fe-img.tengzhihh.com/image/2de8184acd2b92bdb6fcc6631a115ed8-152x152.png"
+    "icon":"https://fe-img.tengzhihh.com/image/2de8184acd2b92bdb6fcc663152x152.png"
 }</textarea>
-                <button class="btn-secondary" id="importJsonBtn">从JSON导入</button>
-            </div>
-        </div>
+        <button class="btn-secondary" id="importJsonBtn">从JSON导入</button>
+    </div>
+    <!-- =================================================================== -->
+
+    <div class="container">
+        <div class="form-card">
             <h2>📋 配置参数</h2>
             
             <div class="form-group">
                 <label for="alias">产品别名 (alias) *</label>
-                <input type="text" id="alias" placeholder="例如：product_001" required>
+                <input type="text" id="alias" required>
             </div>
-            
             <div class="form-group">
                 <label for="algorithm_path">算法路径 (algorithm_path) *</label>
-                <input type="text" id="algorithm_path" placeholder="例如：/alg/java/2026/xxx.jar" required>
+                <input type="text" id="algorithm_path" required>
             </div>
-            
             <div class="form-group">
                 <label for="goods_id">商品ID (goods_id) *</label>
-                <input type="text" id="goods_id" placeholder="例如：100001" required>
+                <input type="text" id="goods_id" required>
             </div>
-            
             <div class="form-group">
                 <label for="product_id">产品ID (product_id) *</label>
-                <input type="number" id="product_id" placeholder="例如：101" required>
+                <input type="text" id="product_id" required>
             </div>
-            
             <div class="form-group">
                 <label for="name">产品名称 (name) *</label>
-                <input type="text" id="name" placeholder="例如：XX产品2026版" required>
+                <input type="text" id="name" required>
             </div>
-            
             <div class="form-group">
                 <label for="amount">金额 (amount) *</label>
-                <input type="number" step="0.01" id="amount" placeholder="例如：99.00" required>
+                <input type="number" step="0.01" id="amount" required>
             </div>
-            
             <div class="form-group">
                 <label for="origin_amount">原始金额 (origin_amount) *</label>
-                <input type="number" step="0.01" id="origin_amount" placeholder="例如：99.00" required>
+                <input type="number" step="0.01" id="origin_amount" required>
             </div>
-            
             <div class="form-group">
                 <label for="app_id">应用ID (app_id) *</label>
-                <input type="text" id="app_id" placeholder="例如：app_001" required>
+                <input type="text" id="app_id" required>
             </div>
-            
             <div class="form-group">
                 <label for="path">日志路径 (path) *</label>
-                <input type="text" id="path" placeholder="例如：/log/xxx/2026" required>
+                <input type="text" id="path" required>
             </div>
-            
             <div class="form-group">
                 <label for="channel_id">渠道ID (channel_id) *</label>
-                <input type="text" id="channel_id" placeholder="例如：channel_001" required>
+                <input type="text" id="channel_id" required>
             </div>
-            
             <div class="form-group">
                 <label for="pay_amount">支付金额 (pay_amount) *</label>
-                <input type="number" step="0.01" id="pay_amount" placeholder="例如：99.00" required>
+                <input type="number" step="0.01" id="pay_amount" required>
             </div>
-            
             <div class="form-group">
                 <label for="icon">图标URL (icon)</label>
-                <input type="text" id="icon" placeholder="url" required>
+                <input type="text" id="icon">
+            </div>
+            <div class="form-group">
+                <label for="index_url">首页地址 (index_url)</label>
+                <input type="text" id="index_url">
             </div>
             
             <div class="btn-group">
                 <button class="btn-primary" id="generateBtn">生成SQL</button>
                 <button class="btn-secondary" id="resetBtn">重置表单</button>
             </div>
-            
-          
+        </div>
         
         <div class="result-card">
             <h2>🎯 生成结果</h2>
-            <div id="status" class="status info">请填写配置参数并点击"生成SQL"按钮</div>
+            <div id="status" class="status info">请点击导入JSON → 生成SQL</div>
             <div class="result-area" id="sqlResult"></div>
             <div class="btn-group">
                 <button class="btn-success" id="copyBtn">复制到剪贴板</button>
@@ -283,142 +252,113 @@
         </div>
     </div>
 
-    <script>
-        const aliasInput = document.getElementById('alias');
-        const algorithmPathInput = document.getElementById('algorithm_path');
-        const goodsIdInput = document.getElementById('goods_id');
-        const productIdInput = document.getElementById('product_id');
-        const nameInput = document.getElementById('name');
-        const amountInput = document.getElementById('amount');
-        const originAmountInput = document.getElementById('origin_amount');
-        const appIdInput = document.getElementById('app_id');
-        const pathInput = document.getElementById('path');
-        const channelIdInput = document.getElementById('channel_id');
-        const payAmountInput = document.getElementById('pay_amount');
-        const iconInput = document.getElementById('icon');
-        const jsonInput = document.getElementById('jsonInput');
-        
-        const generateBtn = document.getElementById('generateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const importJsonBtn = document.getElementById('importJsonBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        
-        const statusDiv = document.getElementById('status');
-        const sqlResultDiv = document.getElementById('sqlResult');
+<script>
+    const els = {
+        alias: document.getElementById('alias'),
+        algorithm_path: document.getElementById('algorithm_path'),
+        goods_id: document.getElementById('goods_id'),
+        product_id: document.getElementById('product_id'),
+        name: document.getElementById('name'),
+        amount: document.getElementById('amount'),
+        origin_amount: document.getElementById('origin_amount'),
+        app_id: document.getElementById('app_id'),
+        path: document.getElementById('path'),
+        channel_id: document.getElementById('channel_id'),
+        pay_amount: document.getElementById('pay_amount'),
+        icon: document.getElementById('icon'),
+        index_url: document.getElementById('index_url'),
+        jsonInput: document.getElementById('jsonInput'),
+        generateBtn: document.getElementById('generateBtn'),
+        resetBtn: document.getElementById('resetBtn'),
+        importJsonBtn: document.getElementById('importJsonBtn'),
+        copyBtn: document.getElementById('copyBtn'),
+        saveBtn: document.getElementById('saveBtn'),
+        status: document.getElementById('status'),
+        sqlResult: document.getElementById('sqlResult')
+    };
 
-        // 核心修复：完全删除错误正则，不再生成g变量
-        function generateSql(params) {
-            const now = new Date();
-            const createTime = now.getFullYear() + "-" + 
-                String(now.getMonth()+1).padStart(2,'0') + "-" + 
-                String(now.getDate()).padStart(2,'0') + " " +
-                String(now.getHours()).padStart(2,'0') + ":" +
-                String(now.getMinutes()).padStart(2,'0') + ":" +
-                String(now.getSeconds()).padStart(2,'0');
+    function generateSql(params) {
+        const now = new Date();
+        const createTime = now.getFullYear() + "-" + 
+            String(now.getMonth()+1).padStart(2,'0') + "-" + 
+            String(now.getDate()).padStart(2,'0') + " " +
+            String(now.getHours()).padStart(2,'0') + ":" +
+            String(now.getMinutes()).padStart(2,'0') + ":" +
+            String(now.getSeconds()).padStart(2,'0');
 
-            const expireDate = new Date(now);
-            expireDate.setDate(expireDate.getDate() + 3);
-            const expireTime = expireDate.getFullYear() + "-" + 
-                String(expireDate.getMonth()+1).padStart(2,'0') + "-" + 
-                String(expireDate.getDate()).padStart(2,'0') + " " +
-                String(expireDate.getHours()).padStart(2,'0') + ":" +
-                String(expireDate.getMinutes()).padStart(2,'0') + ":" +
-                String(expireDate.getSeconds()).padStart(2,'0');
+        const ex = new Date(now);
+        ex.setDate(ex.getDate() + 3);
+        const expireTime = ex.getFullYear() + "-" + 
+            String(ex.getMonth()+1).padStart(2,'0') + "-" + 
+            String(ex.getDate()).padStart(2,'0') + " " +
+            String(ex.getHours()).padStart(2,'0') + ":" +
+            String(ex.getMinutes()).padStart(2,'0') + ":" +
+            String(ex.getSeconds()).padStart(2,'0');
 
-            const icon = params.icon || 'https://fe-img.tengzhihh.com/image/709ddeea17a735048fb06e85d9c6f8a2-152x152.png';
-            
-            const sqls = [];
-            sqls.push(`INSERT INTO \`products\`(\`id\`, \`extend\`, \`goods_id\`, \`product_id\`, \`alias\`, \`name\`, \`category\`, \`wechat_category\`, \`description\`, \`amount\`, \`origin_amount\`, \`currency\`, \`transfer_url\`, \`index_url\`, \`return_url\`, \`algorithm_uri\`, \`algorithm_type\`, \`created_at\`, \`updated_at\`, \`deleted_at\`, \`type\`, \`master_type\`, \`sms_url\`, \`mode\`) VALUES ('${params.alias}', '{"xiYongShenType":3,"base_year":2026,"algorithm":{"2026":{"type":"java_alg","path":"${params.algorithm_path}"}}}', '${params.goods_id}', ${params.product_id}, '', '${params.name}', 'other', 'other', '${params.name}', ${params.amount}, ${params.origin_amount}, 'cny', '', '${params.index_url || ''}', '', '${params.algorithm_path}', 'java_alg', '${createTime}', '${createTime}', NULL, 0, 'default', '', 'nomal');`);
-            sqls.push(`INSERT INTO \`product_resources\`(\`product_id\`, \`icon\`, \`created_at\`, \`updated_at\`) VALUES ('${params.alias}', '${icon}', '${createTime}', '${createTime}');`);
-            sqls.push(`INSERT INTO \`product_relate_bigdatas\`(\`app_id\`, \`product_id\`, \`is_data_price\`, \`log_path\`, \`is_attr\`) VALUES ('${params.app_id}', '${params.alias}', 0, '${params.path}', 1);`);
-            sqls.push(`INSERT INTO \`product_configs\`(\`channel_id\`, \`product_id\`, \`mode\`, \`name\`, \`value\`, \`created_at\`, \`updated_at\`) VALUES ('all', '${params.alias}', 'full', 'next_link', '1', '${createTime}', '${createTime}');`);
-            sqls.push(`INSERT INTO \`product_configs\`(\`channel_id\`, \`product_id\`, \`mode\`, \`name\`, \`value\`, \`created_at\`, \`updated_at\`) VALUES ('all', '${params.alias}', 'full', 'alg_birthday_v2', '{"min_alg_birthday":"1956-01-01"}', '${createTime}', '${createTime}');`);
-            sqls.push(`INSERT INTO \`channel_product\`(\`product_id\`, \`channel_id\`, \`is_free\`, \`amount\`, \`extend_info\`, \`pay_point\`, \`created_at\`, \`updated_at\`, \`deleted_at\`, \`expired_at\`, \`started_at\`) VALUES ('${params.alias}', '${params.channel_id}', 'no', ${params.pay_amount}, NULL, '', '${createTime}', '${createTime}', NULL, '${expireTime}', '${createTime}');`);
-            return sqls;
+        return [
+`INSERT INTO \`products\`(\`id\`,\`extend\`,\`goods_id\`,\`product_id\`,\`alias\`,\`name\`,\`category\`,\`wechat_category\`,\`description\`,\`amount\`,\`origin_amount\`,\`currency\`,\`transfer_url\`,\`index_url\`,\`return_url\`,\`algorithm_uri\`,\`algorithm_type\`,\`created_at\`,\`updated_at\`,\`deleted_at\`,\`type\`,\`master_type\`,\`sms_url\`,\`mode\`) VALUES ('${params.alias}','{"xiYongShenType":3,"base_year":2026,"algorithm":{"2026":{"type":"java_alg","path":"${params.algorithm_path}"}}}','${params.goods_id}',${params.product_id},'','${params.name}','other','other','${params.name}',${params.amount},${params.origin_amount},'cny','','${params.index_url||''}','','${params.algorithm_path}','java_alg','${createTime}','${createTime}',NULL,0,'default','','nomal');`,
+`INSERT INTO \`product_resources\`(\`product_id\`,\`icon\`,\`created_at\`,\`updated_at\`) VALUES ('${params.alias}','${params.icon}','${createTime}','${createTime}');`,
+`INSERT INTO \`product_relate_bigdatas\`(\`app_id\`,\`product_id\`,\`is_data_price\`,\`log_path\`,\`is_attr\`) VALUES ('${params.app_id}','${params.alias}',0,'${params.path}',1);`,
+`INSERT INTO \`product_configs\`(\`channel_id\`,\`product_id\`,\`mode\`,\`name\`,\`value\`,\`created_at\`,\`updated_at\`) VALUES ('all','${params.alias}','full','next_link','1','${createTime}','${createTime}');`,
+`INSERT INTO \`product_configs\`(\`channel_id\`,\`product_id\`,\`mode\`,\`name\`,\`value\`,\`created_at\`,\`updated_at\`) VALUES ('all','${params.alias}','full','alg_birthday_v2','{"min_alg_birthday":"1956-01-01"}','${createTime}','${createTime}');`,
+`INSERT INTO \`channel_product\`(\`product_id\`,\`channel_id\`,\`is_free\`,\`amount\`,\`extend_info\`,\`pay_point\`,\`created_at\`,\`updated_at\`,\`deleted_at\`,\`expired_at\`,\`started_at\`) VALUES ('${params.alias}','${params.channel_id}','no',${params.pay_amount},NULL,'','${createTime}','${createTime}',NULL,'${expireTime}','${createTime}');`
+        ];
+    }
+
+    function updateStatus(msg, type='info') {
+        els.status.className = 'status ' + type;
+        els.status.textContent = msg;
+    }
+
+    // 导入JSON
+    els.importJsonBtn.onclick = () => {
+        try {
+            const data = JSON.parse(els.jsonInput.value.trim());
+            const c = Array.isArray(data) ? data[0] : data;
+            Object.keys(c).forEach(k => els[k] && (els[k].value = c[k]));
+            updateStatus('✅ JSON导入成功', 'success');
+        } catch(e) {
+            updateStatus('❌ JSON格式错误', 'error');
         }
+    };
 
-        function updateStatus(message, type = 'info') {
-            statusDiv.className = `status ${type}`;
-            statusDiv.textContent = message;
+    // 生成SQL
+    els.generateBtn.onclick = () => {
+        try {
+            const params = {};
+            ['alias','algorithm_path','goods_id','product_id','name','amount','origin_amount','app_id','path','channel_id','pay_amount','icon','index_url'].forEach(k => params[k] = els[k].value.trim());
+            const sqls = generateSql(params);
+            els.sqlResult.textContent = sqls.join('\n');
+            updateStatus(`✅ 成功生成 ${sqls.length} 条SQL`, 'success');
+        } catch(e) {
+            updateStatus('❌ 请填写完整参数', 'error');
         }
+    };
 
-        generateBtn.addEventListener('click', () => {
-            try {
-                const requiredFields = [
-                    { el: aliasInput, name: '产品别名' },{ el: algorithmPathInput, name: '算法路径' },
-                    { el: goodsIdInput, name: '商品ID' },{ el: productIdInput, name: '产品ID' },
-                    { el: nameInput, name: '产品名称' },{ el: amountInput, name: '金额' },
-                    { el: originAmountInput, name: '原始金额' },{ el: appIdInput, name: '应用ID' },
-                    { el: pathInput, name: '日志路径' },{ el: channelIdInput, name: '渠道ID' },
-                    { el: payAmountInput, name: '支付金额' }
-                ];
-                
-                for (const field of requiredFields) {
-                    if (!field.el.value.trim()) throw new Error(`请填写${field.name}`);
-                }
-                
-                const params = {
-                    alias: aliasInput.value.trim(), algorithm_path: algorithmPathInput.value.trim(),
-                    goods_id: goodsIdInput.value.trim(), product_id: productIdInput.value.trim(),
-                    name: nameInput.value.trim(), amount: amountInput.value.trim(),
-                    origin_amount: originAmountInput.value.trim(), app_id: appIdInput.value.trim(),
-                    path: pathInput.value.trim(), channel_id: channelIdInput.value.trim(),
-                    pay_amount: payAmountInput.value.trim(), icon: iconInput.value.trim()
-                };
-                
-                const sqls = generateSql(params);
-                sqlResultDiv.textContent = sqls.join('\n');
-                updateStatus(`✅ 成功生成6条SQL语句`, 'success');
-            } catch (error) {
-                updateStatus(`❌ ${error.message}`, 'error');
-            }
-        });
+    // 复制
+    els.copyBtn.onclick = async () => {
+        await navigator.clipboard.writeText(els.sqlResult.textContent);
+        updateStatus('✅ 复制成功', 'success');
+    };
 
-        resetBtn.addEventListener('click', () => {
-            document.querySelectorAll('input').forEach(input => { if (input.id !== 'icon') input.value = ''; });
-            sqlResultDiv.textContent = ''; jsonInput.value = '';
-            updateStatus('请填写配置参数并点击"生成SQL"按钮', 'info');
-        });
+    // 保存
+    els.saveBtn.onclick = () => {
+        const blob = new Blob([els.sqlResult.textContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sql_${els.name.value||'product'}.sql`;
+        a.click();
+        URL.revokeObjectURL(url);
+        updateStatus('✅ 保存成功', 'success');
+    };
 
-        importJsonBtn.addEventListener('click', () => {
-            try {
-                if (!jsonInput.value.trim()) throw new Error('请输入JSON配置内容');
-                const data = JSON.parse(jsonInput.value.trim());
-                const configs = Array.isArray(data) ? data : [data];
-                const config = configs[0];
-                
-                aliasInput.value = config.alias || ''; algorithmPathInput.value = config.algorithm_path || '';
-                goodsIdInput.value = config.goods_id || ''; productIdInput.value = config.product_id || '';
-                nameInput.value = config.name || ''; amountInput.value = config.amount || '';
-                originAmountInput.value = config.origin_amount || ''; appIdInput.value = config.app_id || '';
-                pathInput.value = config.path || ''; channelIdInput.value = config.channel_id || '';
-                payAmountInput.value = config.pay_amount || '';
-                
-                updateStatus('✅ JSON导入成功', 'success');
-            } catch (e) {
-                updateStatus(`❌ JSON导入失败：${e.message}`, 'error');
-            }
-        });
-
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(sqlResultDiv.textContent);
-                updateStatus('✅ 复制成功', 'success');
-            } catch(e) {
-                updateStatus('❌ 复制失败', 'error');
-            }
-        });
-
-        saveBtn.addEventListener('click', () => {
-            const text = sqlResultDiv.textContent;
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `sql_${nameInput.value || 'product'}.sql`;
-            a.click(); URL.revokeObjectURL(url);
-            updateStatus('✅ 文件保存成功', 'success');
-        });
-    </script>
+    // 重置
+    els.resetBtn.onclick = () => {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        els.sqlResult.textContent = '';
+        updateStatus('🧹 已重置', 'info');
+    };
+</script>
 </body>
 </html>
