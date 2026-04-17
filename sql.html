@@ -321,7 +321,7 @@
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit'
-            }).replace(/\\//g, '-').replace(/\\s+/g, ' ').replace(/(\\d+)月(\\d+)日/, '$1-$2');
+            }).replace(/\//g, '-').replace(/\s+/g, ' ').replace(/(\d+)月(\d+)日/, '$1-$2');
             
             // 计算过期时间（当前日期+3天）
             const expireDate = new Date();
@@ -333,7 +333,7 @@
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit'
-            }).replace(/\\//g, '-').replace(/\\s+/g, ' ').replace(/(\\d+)月(\\d+)日/, '$1-$2');
+            }).replace(/\//g, '-').replace(/\s+/g, ' ').replace(/(\d+)月(\d+)日/, '$1-$2');
             
             // 图标默认值
             const icon = params.icon || 'https://fe-img.tengzhihh.com/image/709ddeea17a735048fb06e85d9c6f8a2-152x152.png';
@@ -409,7 +409,7 @@
                 
                 // 生成SQL
                 const sqls = generateSql(params);
-                const fullSql = sqls.join('\\n');
+                const fullSql = sqls.join('\n');
                 
                 // 显示结果
                 sqlResultDiv.textContent = fullSql;
@@ -477,7 +477,7 @@
                         }
                     });
                     
-                    sqlResultDiv.textContent = allSqls.join('\\n');
+                    sqlResultDiv.textContent = allSqls.join('\n');
                     updateStatus(`✅ 成功生成${allSqls.length}条SQL语句（${configs.length}个产品）`, 'success');
                 } else {
                     updateStatus('✅ JSON导入成功，请点击"生成SQL"按钮', 'success');
