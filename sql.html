@@ -183,6 +183,26 @@
     
     <div class="container">
         <div class="form-card">
+              <div class="json-import">
+                <h3>📥 批量导入JSON配置</h3>
+                <textarea class="json-area" id="jsonInput">{
+    "alias": "wu_xing_sheng_ke_da_yun",
+    "product_id": "177613634479110248",
+    "app_id": "A1046",
+    "goods_id": "59912",
+    "name": "五行生克大运",
+    "amount": 38,
+    "origin_amount": 68,
+    "pay_amount": 0.03,
+    "path":"wuxingshengkedayun",
+    "algorithm_path": "/ziwei/wuxingshengkedayun",
+    "index_url": "/wuxingshengkedayun/index",
+    "channel_id": "online_paytest",
+    "icon":"https://fe-img.tengzhihh.com/image/2de8184acd2b92bdb6fcc6631a115ed8-152x152.png"
+}</textarea>
+                <button class="btn-secondary" id="importJsonBtn">从JSON导入</button>
+            </div>
+        </div>
             <h2>📋 配置参数</h2>
             
             <div class="form-group">
@@ -242,7 +262,7 @@
             
             <div class="form-group">
                 <label for="icon">图标URL (icon)</label>
-                <input type="text" id="icon" placeholder="留空使用默认值" value="https://fe-img.tengzhihh.com/image/709ddeea17a735048fb06e85d9c6f8a2-152x152.png">
+                <input type="text" id="icon" placeholder="url" required>
             </div>
             
             <div class="btn-group">
@@ -250,26 +270,7 @@
                 <button class="btn-secondary" id="resetBtn">重置表单</button>
             </div>
             
-            <div class="json-import">
-                <h3>📥 批量导入JSON配置</h3>
-                <textarea class="json-area" id="jsonInput">{
-    "alias": "wu_xing_sheng_ke_da_yun",
-    "product_id": "177613634479110248",
-    "app_id": "A1046",
-    "goods_id": "59912",
-    "name": "五行生克大运",
-    "amount": 38,
-    "origin_amount": 68,
-    "pay_amount": 0.03,
-    "path":"wuxingshengkedayun",
-    "algorithm_path": "/ziwei/wuxingshengkedayun",
-    "index_url": "/wuxingshengkedayun/index",
-    "channel_id": "online_paytest",
-    "icon":"https://fe-img.tengzhihh.com/image/2de8184acd2b92bdb6fcc6631a115ed8-152x152.png"
-}</textarea>
-                <button class="btn-secondary" id="importJsonBtn">从JSON导入</button>
-            </div>
-        </div>
+          
         
         <div class="result-card">
             <h2>🎯 生成结果</h2>
