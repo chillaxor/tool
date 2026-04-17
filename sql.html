@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品SQL语句生成工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .header h1 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-card, .result-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-card h2, .result-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .result-area {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 15px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .json-import {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .json-area {
+            width: 100%;
+            min-height: 200px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 产品 SQL 语句生成工具</h1>
+        <p>生成产品相关的INSERT SQL语句</p>
+    </div>
+    
+    <div class="container">
+        <div class="form-card">
+            <h2>📋 配置参数</h2>
+            
+            <div class="form-group">
+                <label for="alias">产品别名 (alias) *</label>
+                <input type="text" id="alias" placeholder="例如：product_001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="algorithm_path">算法路径 (algorithm_path) *</label>
+                <input type="text" id="algorithm_path" placeholder="例如：/alg/java/2026/xxx.jar" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="goods_id">商品ID (goods_id) *</label>
+                <input type="text" id="goods_id" placeholder="例如：100001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="product_id">产品ID (product_id) *</label>
+                <input type="number" id="product_id" placeholder="例如：101" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="name">产品名称 (name) *</label>
+                <input type="text" id="name" placeholder="例如：XX产品2026版" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">金额 (amount) *</label>
+                <input type="number" step="0.01" id="amount" placeholder="例如：99.00" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="origin_amount">原始金额 (origin_amount) *</label>
+                <input type="number" step="0.01" id="origin_amount" placeholder="例如：99.00" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="app_id">应用ID (app_id) *</label>
+                <input type="text" id="app_id" placeholder="例如：app_001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="path">日志路径 (path) *</label>
+                <input type="text" id="path" placeholder="例如：/log/xxx/2026" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="channel_id">渠道ID (channel_id) *</label>
+                <input type="text" id="channel_id" placeholder="例如：channel_001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pay_amount">支付金额 (pay_amount) *</label>
+                <input type="number" step="0.01" id="pay_amount" placeholder="例如：99.00" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="icon">图标URL (icon)</label>
+                <input type="text" id="icon" placeholder="留空使用默认值" value="https://fe-img.tengzhihh.com/image/709ddeea17a735048fb06e85d9c6f8a2-152x152.png">
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn-primary" id="generateBtn">生成SQL</button>
+                <button class="btn-secondary" id="resetBtn">重置表单</button>
+            </div>
+            
+            <div class="json-import">
+                <h3>📥 批量导入JSON配置</h3>
+                <textarea class="json-area" id="jsonInput" placeholder='示例：
+{
+  "alias": "product_001",
+  "algorithm_path": "/alg/java/2026/xxx.jar",
+  "goods_id": "100001",
+  "product_id": 101,
+  "name": "XX产品2026版",
+  "amount": 99.00,
+  "origin_amount": 99.00,
+  "app_id": "app_001",
+  "path": "/log/xxx/2026",
+  "channel_id": "channel_001",
+  "pay_amount": 99.00
+}
+或数组格式：[{}, {}]'></textarea>
+                <button class="btn-secondary" id="importJsonBtn">从JSON导入</button>
+            </div>
+        </div>
+        
+        <div class="result-card">
+            <h2>🎯 生成结果</h2>
+            
+            <div id="status" class="status info">
+                请填写配置参数并点击"生成SQL"按钮
+            </div>
+            
+            <div class="result-area" id="sqlResult"></div>
+            
+            <div class="btn-group">
+                <button class="btn-success" id="copyBtn">复制到剪贴板</button>
+                <button class="btn-primary" id="saveBtn">保存到文件</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const aliasInput = document.getElementById('alias');
+        const algorithmPathInput = document.getElementById('algorithm_path');
+        const goodsIdInput = document.getElementById('goods_id');
+        const productIdInput = document.getElementById('product_id');
+        const nameInput = document.getElementById('name');
+        const amountInput = document.getElementById('amount');
+        const originAmountInput = document.getElementById('origin_amount');
+        const appIdInput = document.getElementById('app_id');
+        const pathInput = document.getElementById('path');
+        const channelIdInput = document.getElementById('channel_id');
+        const payAmountInput = document.getElementById('pay_amount');
+        const iconInput = document.getElementById('icon');
+        const jsonInput = document.getElementById('jsonInput');
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const importJsonBtn = document.getElementById('importJsonBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        
+        const statusDiv = document.getElementById('status');
+        const sqlResultDiv = document.getElementById('sqlResult');
+        
+        // 生成SQL语句
+        function generateSql(params) {
+            const now = new Date().toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/\\//g, '-').replace(/\\s+/g, ' ').replace(/(\\d+)月(\\d+)日/, '$1-$2');
+            
+            // 计算过期时间（当前日期+3天）
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 3);
+            const expireTime = expireDate.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/\\//g, '-').replace(/\\s+/g, ' ').replace(/(\\d+)月(\\d+)日/, '$1-$2');
+            
+            // 图标默认值
+            const icon = params.icon || 'https://fe-img.tengzhihh.com/image/709ddeea17a735048fb06e85d9c6f8a2-152x152.png';
+            
+            const sqls = [];
+            
+            // 1. products 表
+            sqls.push(`INSERT INTO \`products\`(\`id\`, \`extend\`, \`goods_id\`, \`product_id\`, \`alias\`, \`name\`, \`category\`, \`wechat_category\`, \`description\`, \`amount\`, \`origin_amount\`, \`currency\`, \`transfer_url\`, \`index_url\`, \`return_url\`, \`algorithm_uri\`, \`algorithm_type\`, \`created_at\`, \`updated_at\`, \`deleted_at\`, \`type\`, \`master_type\`, \`sms_url\`, \`mode\`) VALUES ('${params.alias}', '{"xiYongShenType":3,"base_year":2026,"algorithm":{"2026":{"type":"java_alg","path":"${params.algorithm_path}"}}}', '${params.goods_id}', ${params.product_id}, '', '${params.name}', 'other', 'other', '${params.name}', ${params.amount}, ${params.origin_amount}, 'cny', '', '${params.index_url || ''}', '', '${params.algorithm_path}', 'java_alg', '${now}', '${now}', NULL, 0, 'default', '', 'nomal');`);
+            
+            // 2. product_resources 表
+            sqls.push(`INSERT INTO \`product_resources\`(\`product_id\`, \`icon\`, \`created_at\`, \`updated_at\`) VALUES ('${params.alias}', '${icon}', '${now}', '${now}');`);
+            
+            // 3. product_relate_bigdatas 表
+            sqls.push(`INSERT INTO \`product_relate_bigdatas\`(\`app_id\`, \`product_id\`, \`is_data_price\`, \`log_path\`, \`is_attr\`) VALUES ('${params.app_id}', '${params.alias}', 0, '${params.path}', 1);`);
+            
+            // 4. product_configs 表 (next_link)
+            sqls.push(`INSERT INTO \`product_configs\`(\`channel_id\`, \`product_id\`, \`mode\`, \`name\`, \`value\`, \`created_at\`, \`updated_at\`) VALUES ('all', '${params.alias}', 'full', 'next_link', '1', '${now}', '${now}');`);
+            
+            // 5. product_configs 表 (alg_birthday_v2)
+            sqls.push(`INSERT INTO \`product_configs\`(\`channel_id\`, \`product_id\`, \`mode\`, \`name\`, \`value\`, \`created_at\`, \`updated_at\`) VALUES ('all', '${params.alias}', 'full', 'alg_birthday_v2', '{"min_alg_birthday":"1956-01-01"}', '${now}', '${now}');`);
+            
+            // 6. channel_product 表
+            sqls.push(`INSERT INTO \`channel_product\`(\`product_id\`, \`channel_id\`, \`is_free\`, \`amount\`, \`extend_info\`, \`pay_point\`, \`created_at\`, \`updated_at\`, \`deleted_at\`, \`expired_at\`, \`started_at\`) VALUES ('${params.alias}', '${params.channel_id}', 'no', ${params.pay_amount}, NULL, '', '${now}', '${now}', NULL, '${expireTime}', '${now}');`);
+            
+            return sqls;
+        }
+        
+        // 更新状态提示
+        function updateStatus(message, type = 'info') {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        // 生成SQL按钮点击事件
+        generateBtn.addEventListener('click', () => {
+            try {
+                // 验证必填字段
+                const requiredFields = [
+                    { el: aliasInput, name: '产品别名' },
+                    { el: algorithmPathInput, name: '算法路径' },
+                    { el: goodsIdInput, name: '商品ID' },
+                    { el: productIdInput, name: '产品ID' },
+                    { el: nameInput, name: '产品名称' },
+                    { el: amountInput, name: '金额' },
+                    { el: originAmountInput, name: '原始金额' },
+                    { el: appIdInput, name: '应用ID' },
+                    { el: pathInput, name: '日志路径' },
+                    { el: channelIdInput, name: '渠道ID' },
+                    { el: payAmountInput, name: '支付金额' }
+                ];
+                
+                for (const field of requiredFields) {
+                    if (!field.el.value.trim()) {
+                        throw new Error(`请填写${field.name}`);
+                    }
+                }
+                
+                // 构建参数对象
+                const params = {
+                    alias: aliasInput.value.trim(),
+                    algorithm_path: algorithmPathInput.value.trim(),
+                    goods_id: goodsIdInput.value.trim(),
+                    product_id: productIdInput.value.trim(),
+                    name: nameInput.value.trim(),
+                    amount: amountInput.value.trim(),
+                    origin_amount: originAmountInput.value.trim(),
+                    app_id: appIdInput.value.trim(),
+                    path: pathInput.value.trim(),
+                    channel_id: channelIdInput.value.trim(),
+                    pay_amount: payAmountInput.value.trim(),
+                    icon: iconInput.value.trim()
+                };
+                
+                // 生成SQL
+                const sqls = generateSql(params);
+                const fullSql = sqls.join('\\n');
+                
+                // 显示结果
+                sqlResultDiv.textContent = fullSql;
+                updateStatus(`✅ 成功生成6条SQL语句`, 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        // 重置表单按钮点击事件
+        resetBtn.addEventListener('click', () => {
+            document.querySelectorAll('input').forEach(input => {
+                if (input.id !== 'icon') {
+                    input.value = '';
+                }
+            });
+            sqlResultDiv.textContent = '';
+            jsonInput.value = '';
+            updateStatus('请填写配置参数并点击"生成SQL"按钮', 'info');
+        });
+        
+        // 导入JSON按钮点击事件
+        importJsonBtn.addEventListener('click', () => {
+            try {
+                if (!jsonInput.value.trim()) {
+                    throw new Error('请输入JSON配置内容');
+                }
+                
+                const data = JSON.parse(jsonInput.value.trim());
+                const configs = Array.isArray(data) ? data : [data];
+                
+                if (configs.length === 0) {
+                    throw new Error('JSON配置不能为空');
+                }
+                
+                // 使用第一条配置填充表单
+                const config = configs[0];
+                
+                aliasInput.value = config.alias || '';
+                algorithmPathInput.value = config.algorithm_path || '';
+                goodsIdInput.value = config.goods_id || '';
+                productIdInput.value = config.product_id || '';
+                nameInput.value = config.name || '';
+                amountInput.value = config.amount || '';
+                originAmountInput.value = config.origin_amount || '';
+                appIdInput.value = config.app_id || '';
+                pathInput.value = config.path || '';
+                channelIdInput.value = config.channel_id || '';
+                payAmountInput.value = config.pay_amount || '';
+                iconInput.value = config.icon || iconInput.value;
+                
+                // 如果是多条配置，直接生成所有SQL
+                if (configs.length > 1) {
+                    let allSqls = [];
+                    configs.forEach((cfg, index) => {
+                        const sqls = generateSql({
+                            ...cfg,
+                            icon: cfg.icon || iconInput.value
+                        });
+                        allSqls = allSqls.concat(sqls);
+                        if (index < configs.length - 1) {
+                            allSqls.push(''); // 分隔空行
+                        }
+                    });
+                    
+                    sqlResultDiv.textContent = allSqls.join('\\n');
+                    updateStatus(`✅ 成功生成${allSqls.length}条SQL语句（${configs.length}个产品）`, 'success');
+                } else {
+                    updateStatus('✅ JSON导入成功，请点击"生成SQL"按钮', 'success');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ JSON导入失败：${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        // 复制到剪贴板按钮点击事件
+        copyBtn.addEventListener('click', async () => {
+            try {
+                const text = sqlResultDiv.textContent;
+                if (!text) {
+                    throw new Error('没有可复制的SQL内容');
+                }
+                
+                await navigator.clipboard.writeText(text);
+                updateStatus('📋 SQL已复制到剪贴板', 'success');
+                
+            } catch (error) {
+                updateStatus(`⚠️ 复制失败：${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        // 保存到文件按钮点击事件
+        saveBtn.addEventListener('click', () => {
+            try {
+                const text = sqlResultDiv.textContent;
+                if (!text) {
+                    throw new Error('没有可保存的SQL内容');
+                }
+                
+                const name = nameInput.value.trim() || 'product';
+                const filename = `sql_${name}.sql`;
+                
+                // 创建Blob对象
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                
+                // 创建下载链接
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                updateStatus(`✅ SQL已保存到文件：${filename}`, 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ 保存失败：${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        // 页面加载完成后的初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            updateStatus('请填写配置参数并点击"生成SQL"按钮', 'info');
+        });
+    </script>
+</body>
+</html>
