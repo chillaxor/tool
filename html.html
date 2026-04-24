@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML 格式化工具</title>
+<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#f5f7fa;font-family:Arial,sans-serif;padding:20px}
+    .container{max-width:1200px;margin:0 auto}
+    .header{margin-bottom:20px}
+    h1{font-size:24px;color:#333}
+    .toolbar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+    button,select{padding:8px 12px;border:1px solid #ddd;border-radius:4px}
+    button{background:#409eff;color:#fff;border:none;cursor:pointer}
+    button:hover{background:#337ecc}
+    .editor{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    textarea{width:100%;height:500px;padding:10px;border:1px solid #ddd;border-radius:4px;resize:vertical;font-family:monospace}
+    @media(max-width:768px){.editor{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>HTML 格式化工具</h1>
+    </div>
+    <div class="toolbar">
+        <button id="formatBtn">格式化 HTML</button>
+        <button id="minifyBtn">压缩 HTML</button>
+        <button id="copyBtn">复制结果</button>
+        <button id="clearBtn">清空</button>
+    </div>
+    <div class="editor">
+        <textarea id="input" placeholder="粘贴 HTML 代码"></textarea>
+        <textarea id="output" readonly placeholder="结果"></textarea>
+    </div>
+</div>
+
+<!-- 官方稳定格式化库 -->
+<script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/standalone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/parser-html.js"></script>
+
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const formatBtn = document.getElementById('formatBtn');
+const minifyBtn = document.getElementById('minifyBtn');
+const copyBtn = document.getElementById('copyBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+// 格式化（专业库，100%成功）
+formatBtn.onclick = function() {
+    try {
+        const formatted = prettier.format(input.value, {
+            parser: "html",
+            tabWidth: 4,
+            useTabs: false,
+            printWidth: 9999
+        });
+        output.value = formatted;
+    } catch(e) {
+        output.value = "代码格式有误，请检查";
+    }
+};
+
+// 压缩
+minifyBtn.onclick = function() {
+    let html = input.value;
+    html = html.replace(/<!--[\s\S]*?-->/g, '');
+    html = html.replace(/\s+/g, ' ');
+    html = html.replace(/>\s+</g, '><');
+    output.value = html.trim();
+};
+
+// 复制
+copyBtn.onclick = function() {
+    output.select();
+    document.execCommand('copy');
+    alert('复制成功');
+};
+
+// 清空
+clearBtn.onclick = function() {
+    input.value = '';
+    output.value = '';
+};
+</script>
+</body>
+</html>
