@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者在线工具集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        .tool-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+            color: #4299e1;
+        }
+
+        .tool-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .tool-desc {
+            font-size: 14px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧰 开发者在线工具集</h1>
+            <p>纯前端处理，安全无上传，开箱即用</p>
+        </div>
+
+        <div class="tool-grid" id="toolList"></div>
+    </div>
+
+    <script>
+        // 工具列表 —— 新增工具只需要在这里加一行
+        const tools = [
+            {
+                name: "JSON 工具",
+                desc: "格式化、压缩、转义、对比、校验",
+                icon: "📋",
+                url: "https://chillaxor.github.io/tool/json.html"
+            },
+            {
+                name: "常用工具集",
+                desc: "URL编解码、Base64、MD5、时间戳",
+                icon: "⚙️",
+                url: "https://chillaxor.github.io/tool/spec.html"
+            },
+            {
+                name: "Excel 合并",
+                desc: "纯前端多XLSX文件合并",
+                icon: "📊",
+                url: "https://chillaxor.github.io/tool/combo.html"
+            }
+            // 往下复制一行，改名字、描述、链接即可扩展
+        ];
+
+        // 自动渲染卡片
+        const toolList = document.getElementById('toolList');
+        tools.forEach(tool => {
+            const card = document.createElement('a');
+            card.className = 'tool-card';
+            card.href = tool.url;
+            card.target = '_blank';
+            card.innerHTML = `
+                <div class="tool-icon">${tool.icon}</div>
+                <div class="tool-title">${tool.name}</div>
+                <div class="tool-desc">${tool.desc}</div>
+            `;
+            toolList.appendChild(card);
+        });
+    </script>
+</body>
+</html>
